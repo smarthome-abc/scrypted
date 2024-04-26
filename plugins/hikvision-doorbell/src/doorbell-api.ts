@@ -50,14 +50,21 @@ export class HikvisionDoorbell_Destroyable extends EventEmitter implements Destr
 export class HikvisionDoorbellAPI implements HikvisionAPI 
 {
     endpoint: string;
+    hangUpEndpoint: string
     auth: AuthRequst;
 
     private deviceModel: Promise<string>;
     private eventServer?: Server;
     private listener?: Destroyable;
 
-    constructor(public ip: string, public port: string, username: string, password: string, public console: Console, public storage: Storage) {
+    constructor(public ip: string, public port: string, username: string, password: string, public console: Console, public storage: Storage, public indoorIp: string, public indoorPort: string) {
         this.endpoint = libip.isV4Format(ip) ? `${ip}:${port}` : `[${ip}]:${port}`;
+        if (indoorIp) {
+            this.hangUpEndpoint = libip.isV4Format(indoorIp) ? `${indoorIp}:${string}` : `[${indoorIp}]:${string}`;
+        } else {
+            this.hangUpEndpoint = libip.isV4Format(ip) ? `${ip}:${port}` : `[${ip}]:${port}`;
+        }
+        
         this.auth = new AuthRequst(username, password, console);
     }
 
@@ -307,7 +314,7 @@ export class HikvisionDoorbellAPI implements HikvisionAPI
         }, '{"CallSignal":{"cmdType":"answer"}}');
         this.console.log(`(stopRinging) Answer return: ${resp.statusCode} - ${resp.body}`);
         resp = await this.request({
-            url: `http://${this.endpoint}/ISAPI/VideoIntercom/callSignal?format=json`,
+            url: `http://${this.hangUpEndpoint}/ISAPI/VideoIntercom/callSignal?format=json`,
             method: 'PUT',
             responseType: 'text',
         }, '{"CallSignal":{"cmdType":"hangUp"}}');
