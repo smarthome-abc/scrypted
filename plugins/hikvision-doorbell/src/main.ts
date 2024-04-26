@@ -806,6 +806,7 @@ export class HikvisionDoorbellProvider extends RtspProvider
         device.putSetting('username', username);
         device.putSetting('password', password);
         device.setIPAddress(settings.ip?.toString());
+        device.setIndoorIp(settings.indoorIp?.toString());
         device.setHttpPortOverride(settings.httpPort?.toString());
         if (twoWayAudio)
             device.putSetting('twoWayAudio', twoWayAudio);
@@ -874,7 +875,9 @@ export class HikvisionDoorbellProvider extends RtspProvider
         aux.putSetting ('user', user);
         aux.putSetting ('pass', pass);
         aux.putSetting ('ip', camera.getIPAddress());
+        aux.putSetting('indoorIp', camera.getIndoorIp());
         aux.putSetting ('port', camera.getHttpPort());
+        aux.putSetting('indoorPort', camera.getIndoorPort());
         aux.putSetting (HikvisionDoorbellProvider.CAMERA_NATIVE_ID_KEY, camera.nativeId);
     }
 
@@ -908,6 +911,17 @@ export class HikvisionDoorbellProvider extends RtspProvider
                 description: 'Optional: Override the HTTP Port from the default value of 80',
                 placeholder: '80',
             },
+            {
+                key: 'indoorIp',
+                title: 'Optional: IP Address of indoor station',
+                placeholder: '192.168.2.222',
+            },
+            {
+                key: 'indoorPort',
+                title: 'Optional: Override the HTTP Port from the default value of 80',
+                placeholder: '80',
+            },
+            
             {
                 key: 'skipValidate',
                 title: 'Skip Validation',
