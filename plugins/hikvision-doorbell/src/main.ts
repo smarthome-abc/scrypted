@@ -27,6 +27,8 @@ const SIP_CLIENT_PROXY_IP_KEY: string = 'sipClientProxyIp';
 const SIP_CLIENT_PROXY_PORT_KEY: string = 'sipClientProxyPort';
 const SIP_SERVER_PORT_KEY: string = 'sipServerPort';
 const SIP_SERVER_INSTALL_ON_KEY: string = 'sipServerInstallOnDevice';
+const indoorIp: string = "indoorIp";
+
 
 const OPEN_LOCK_AUDIO_NOTIFY_DURASTION: number = 3000  // mSeconds
 const UNREACHED_REPEAT_TIMEOUT: number = 10000  // mSeconds
@@ -102,6 +104,12 @@ class HikvisionCameraDoorbell extends HikvisionCamera implements Camera, Interco
     }
 
     getHttpPort(): string {
+        return this.storage.getItem('httpPort') || '80';
+    }
+    getIndoorIp(): string {
+        return this.storage.getItem('indoorIp');
+    }
+    getIndoorPort(): string {
         return this.storage.getItem('httpPort') || '80';
     }
 
@@ -215,7 +223,7 @@ class HikvisionCameraDoorbell extends HikvisionCamera implements Camera, Interco
     }
 
     override createClient() {
-        return new HikvisionDoorbellAPI(this.getIPAddress(), this.getHttpPort(), this.getUsername(), this.getPassword(), this.console, this.storage);
+        return new HikvisionDoorbellAPI(this.getIPAddress(), this.getHttpPort(), this.getUsername(), this.getPassword(), this.console, this.storage, this.getIndoorIp(), this.getIndoorPort());
     }
 
     override getClient(): HikvisionDoorbellAPI {
@@ -504,7 +512,7 @@ class HikvisionCameraDoorbell extends HikvisionCamera implements Camera, Interco
             this.getUsername(), 
             this.getPassword(), 
             this.console,
-            this.storage);
+            this.storage, this.getIndoorIp(), this.getIndoorPort());
     }
 
     private async stopRinging ()
@@ -630,7 +638,9 @@ class HikvisionCameraDoorbell extends HikvisionCamera implements Camera, Interco
                         type: 'boolean'
                     },
                 ];
-
+                
+            case SipMode.OFF:
+                
             default:
                 break;
         }
@@ -806,6 +816,7 @@ export class HikvisionDoorbellProvider extends RtspProvider
         device.putSetting('username', username);
         device.putSetting('password', password);
         device.setIPAddress(settings.ip?.toString());
+        device.set
         device.setHttpPortOverride(settings.httpPort?.toString());
         if (twoWayAudio)
             device.putSetting('twoWayAudio', twoWayAudio);
@@ -875,6 +886,8 @@ export class HikvisionDoorbellProvider extends RtspProvider
         aux.putSetting ('pass', pass);
         aux.putSetting ('ip', camera.getIPAddress());
         aux.putSetting ('port', camera.getHttpPort());
+        aux.putSetting('indoorIp', camera.getIndoorIp());
+        aux.putSetting('indoorPort', camera.getIndoorPort());
         aux.putSetting (HikvisionDoorbellProvider.CAMERA_NATIVE_ID_KEY, camera.nativeId);
     }
 
@@ -908,6 +921,17 @@ export class HikvisionDoorbellProvider extends RtspProvider
                 description: 'Optional: Override the HTTP Port from the default value of 80',
                 placeholder: '80',
             },
+            {
+                key: 'indoorIp',
+                title: 'IP Address of indoor station',
+                placeholder: '192.168.2.221',
+            },
+            {
+                key: 'indoorPort',
+                title: 'Indoor station Port',
+                description: 'Optional: Override the HTTP Port from the default value of 80',
+                placeholder: '80',
+            }
             {
                 key: 'skipValidate',
                 title: 'Skip Validation',
